@@ -18,7 +18,7 @@ export const EducationZ = z.object({
   institution: z.string(),
   location: z.string(),
   degree: z.string(),
-  start: z.string(),
+  start: z.string().nullable().optional(),
   end: z.string(),
   gpaLabel: z.string().optional(),
   gpa: z.string().optional(),
@@ -29,8 +29,8 @@ export const EducationZ = z.object({
 export const ProjectZ = z.object({
   name: z.string(),
   role: z.string().optional(),
-  start: z.string(),
-  end: z.string(),
+  start: z.string().optional().nullable(),
+  end: z.string().optional().nullable(),
   bullets: z.array(z.string().min(1)).min(1),
   tech: z.array(z.string()).optional(),
   links: z.array(LinkZ).optional(),
@@ -39,7 +39,7 @@ export const ProjectZ = z.object({
 export const ExperienceZ = z.object({
   company: z.string(),
   title: z.string(),
-  location: z.string().optional(),
+  location: z.string().optional().nullable(),
   employmentType: z.string().optional(),
   start: z.string(),
   end: z.string(),

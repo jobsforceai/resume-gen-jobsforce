@@ -1,5 +1,5 @@
 export const SAMPLE_JSON = `{
-  "meta": { "version": 2, "generatedAtISO": "${new Date().toISOString()}" },
+  "meta": { "version": 2, "generatedAtISO": "2025-09-06T17:12:28.092Z" },
   "header": {
     "fullName": "Abhinay Reddy",
     "headline": "Full-Stack Engineer • Next.js | Node.js | Cloud",
@@ -14,13 +14,7 @@ export const SAMPLE_JSON = `{
     ]
   },
   "summary": {
-    "paragraph": "Full-stack engineer with a strong focus on performance and product velocity. Built and scaled an AI-powered job platform used by 400+ users; optimized critical paths (−95% load time) and throughput (+60%) using caching, clustering, and background queues.",
-    "highlights": [
-      "End-to-end ownership: Next.js, Node.js, MongoDB, AWS",
-      "Deep JS/TS fundamentals, API design, testing & CI/CD",
-      "Data-driven decisions and pragmatic trade-offs"
-    ]
-  },
+    "paragraph": "Full-stack engineer with a strong focus on performance and product velocity. Built and scaled an AI-powered job platform used by 400+ users; optimized critical paths (−95% load time) and throughput (+60%) using caching, clustering, and background queues."  },
   "education": [
     {
       "institution": "VIT Bhopal University",
@@ -38,7 +32,6 @@ export const SAMPLE_JSON = `{
     {
       "name": "Jobsforce — SaaS Product Website",
       "role": "Founder / Full-Stack",
-      "start": "Jul 2024",
       "end": "Mar 2025",
       "bullets": [
         "Launched Jobsforce.ai with resume–JD matching and agent workflows, reaching 400+ active users.",
@@ -97,17 +90,11 @@ export const SAMPLE_JSON = `{
   ],
   "technicalSkills": {
     "programmingLanguages": ["TypeScript", "JavaScript", "Python", "C++", "Java"],
-    "frameworks": ["Next.js", "React", "Node.js", "Express", "Tailwind"],
-    "cloudDevOps": ["AWS", "Vercel", "Docker", "Redis", "CI/CD"],
-    "databases": ["MongoDB", "MySQL", "PostgreSQL"],
-    "dataPlatforms": [],
-    "tools": ["GitHub", "Jest", "Clerk", "Elasticsearch"],
-    "other": ["Design Systems", "Performance Tuning"]
+    "frameworks": ["Next.js", "React", "Node.js", "Express", "Tailwind"]
   },
   "achievements": [
     "LeetCode: 500+ day streak, 1100+ problems solved (100+ hard), 1709 rating, ~7k rank",
     "Launched JobsForce with AI-assisted resume matching and ATS optimization"
   ],
-  "certifications": ["AWS Cloud Practitioner (in progress)"],
-  "keywordBank": ["REST APIs", "GraphQL", "SSR", "CSR", "JWT", "IndexedDB", "Clustering", "Queues", "Redis", "CI/CD", "SEO", "Performance Optimization"]
+  "certifications": ["AWS Cloud Practitioner (in progress)"]
 }`;

@@ -12,11 +12,12 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 import type { ResumeData } from "@/lib/schema";
+import { motion } from "framer-motion";
 
 /** Ultra-compact tuning */
-const BASE_FONT = 9;
+const BASE_FONT = 11;
 const LINE_HEIGHT = 1.06; // tighter than before
-const PAD_X = 18;
+const PAD_X = 36;
 const PAD_Y = 12;
 
 const COLOR = {
@@ -32,41 +33,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: PAD_X,
     fontSize: BASE_FONT,
     color: COLOR.text,
+    fontFamily: "Times-Roman",
   },
-  lh: { lineHeight: LINE_HEIGHT },
+  lh: { lineHeight: 1.2 },
+  bold: { fontFamily: "Times-Bold" },
 
   // Header
   name: {
-    fontSize: 13.2,
-    fontWeight: 800,
+    fontSize: 16,
+    fontFamily: "Times-Bold",
     marginBottom: 0.5,
     textAlign: "center",
   },
   headline: {
-    fontSize: 9.1,
-    fontWeight: 700,
+    fontSize: 11.5,
+    fontFamily: "Times-Bold",
     marginBottom: 0.5,
     textAlign: "center",
   },
   contact: {
-    fontSize: 8.5,
+    fontSize: 11,
     color: COLOR.muted,
     marginBottom: 1,
     textAlign: "center",
   },
+  contactContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "baseline",
+    marginBottom: 1,
+  },
   linksRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 1,
+    marginBottom: 0.5,
     justifyContent: "center",
   },
-  link: { marginRight: 4, fontSize: 8.4 },
+  link: {
+    marginRight: 4,
+    fontSize: 11,
+    fontFamily: "Times-Bold",
+    color: "#1054CC",
+  },
 
   // Sections
   section: { marginTop: 3 }, // was 6
   sectionTitle: {
-    fontSize: 9,
-    fontWeight: 800,
+    fontSize: 12,
+    fontFamily: "Times-Bold",
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 0.8, // was 1.5
@@ -79,19 +94,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "baseline",
   },
-  title: { fontSize: 9.1, fontWeight: 700 },
-  meta: { color: COLOR.muted, fontSize: 8.3 },
+  title: { fontSize: 11.5, fontFamily: "Times-Bold" },
+  meta: { color: COLOR.muted, fontSize: 11 },
 
   // Lists
-  listBlock: {
-    marginLeft: 4,
-    marginTop: 0,
-    marginBottom: 0,
-    lineHeight: LINE_HEIGHT,
+  bulletContainer: {
+    flexDirection: "row",
+    marginBottom: 1.5,
+  },
+  bulletPoint: {
+    width: 10,
+    fontSize: BASE_FONT,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: BASE_FONT,
   },
 
-  tag: { marginTop: 0.2, color: COLOR.muted, fontSize: 8.3 },
-  tiny: { fontSize: 8, color: COLOR.muted },
+  p: { fontSize: BASE_FONT, lineHeight: 1.2 },
+  tag: { marginTop: 0.2, color: COLOR.muted, fontSize: 11 },
+  tiny: { fontSize: 11, color: COLOR.muted, lineHeight: 1.15 },
 });
 
 const sanitize = (s: string) => s.replace(/\u2212|–|—/g, "-"); // normalize dashes
@@ -113,20 +135,25 @@ const LinkRow: React.FC<{ links: { label: string; url: string }[] }> = ({
   </View>
 );
 
-const BulletsTight: React.FC<{ items: string[] }> = ({ items }) => {
-  // Render all bullets in one Text node to avoid extra inter-line spacing
-  const text = items.map((b) => `• ${sanitize(b)}`).join("\n");
-  return <Text style={[styles.listBlock]}>{text}</Text>;
-};
-
-const DateRange: React.FC<{ start: string; end: string }> = ({
-  start,
-  end,
-}) => (
-  <Text style={[styles.meta, styles.lh]}>
-    {start} – {end}
-  </Text>
+const BulletsTight: React.FC<{ items: string[] }> = ({ items }) => (
+  <View>
+    {items.map((item, i) => (
+      <View key={i} style={styles.bulletContainer}>
+        <Text style={styles.bulletPoint}>•</Text>
+        <Text style={[styles.bulletText, styles.lh]}>{sanitize(item)}</Text>
+      </View>
+    ))}
+  </View>
 );
+
+const DateRange: React.FC<{
+  start?: string | null;
+  end?: string | null;
+}> = ({ start, end }) => {
+  if (!start && !end) return null;
+  const text = [start, end].filter(Boolean).join(" – ");
+  return <Text style={[styles.meta, styles.lh]}>{text}</Text>;
+};
 
 export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
   <Document>
@@ -139,79 +166,95 @@ export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
           {sanitize(data.header.headline)}
         </Text>
       )}
-      <Text style={[styles.contact, styles.lh]}>
-        {pipeJoin([
-          data.header.location,
-          `Phone: ${data.header.phone}`,
-          `Email: ${data.header.email}`,
-        ])}
-      </Text>
-      <LinkRow links={data.header.links} />
-
+      <View style={styles.contactContainer}>
+        <Text style={[styles.contact, { marginBottom: 0 }]}>
+          {pipeJoin([
+            data.header.location,
+            `Phone: ${data.header.phone}`,
+            `Email: ${data.header.email}`,
+          ])}
+        </Text>
+        {data.header.links.length > 0 && (
+          <Text style={[styles.contact, { marginBottom: 0 }]}>&nbsp;|&nbsp;</Text>
+        )}
+        <Text style={[styles.contact, { marginBottom: 0 }]}>
+          {data.header.links.map((l, i) => (
+            <Text key={i}>
+              <Link src={l.url} style={styles.link}>
+                {l.label}
+              </Link>
+              {i < data.header.links.length - 1 ? " | " : ""}
+            </Text>
+          ))}
+        </Text>
+      </View>
       {/* SUMMARY (single Text block, tight) */}
       {data.summary && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Summary</Text>
-          <Text style={[styles.lh]}>{sanitize(data.summary.paragraph)}</Text>
+          <View style={styles.hairline} />
+          <Text style={styles.p}>
+            {sanitize(data.summary.paragraph).replace(/\s*\n+\s*/g, " ")}
+          </Text>
           {data.summary.highlights?.length ? (
-            <Text style={[styles.tiny, styles.lh]}>
+            <Text style={styles.tiny}>
               {data.summary.highlights.map(sanitize).join(" • ")}
             </Text>
           ) : null}
         </View>
       )}
-
       {/* SKILLS (already tight) */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, styles.lh]}>Skills</Text>
+        <View style={styles.hairline} />
         {join(data.technicalSkills.programmingLanguages) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Programming:</Text>{" "}
+            <Text style={styles.bold}>Programming:</Text>{" "}
             {join(data.technicalSkills.programmingLanguages)}
           </Text>
         )}
         {join(data.technicalSkills.frameworks) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Frameworks/Libraries:</Text>{" "}
+            <Text style={styles.bold}>Frameworks/Libraries:</Text>{" "}
             {join(data.technicalSkills.frameworks)}
           </Text>
         )}
         {join(data.technicalSkills.cloudDevOps) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Cloud & DevOps:</Text>{" "}
+            <Text style={styles.bold}>Cloud & DevOps:</Text>{" "}
             {join(data.technicalSkills.cloudDevOps)}
           </Text>
         )}
         {join(data.technicalSkills.databases) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Databases:</Text>{" "}
+            <Text style={styles.bold}>Databases:</Text>{" "}
             {join(data.technicalSkills.databases)}
           </Text>
         )}
         {join(data.technicalSkills.dataPlatforms) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Data Platforms:</Text>{" "}
+            <Text style={styles.bold}>Data Platforms:</Text>{" "}
             {join(data.technicalSkills.dataPlatforms)}
           </Text>
         )}
         {join(data.technicalSkills.tools) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Tools:</Text>{" "}
+            <Text style={styles.bold}>Tools:</Text>{" "}
             {join(data.technicalSkills.tools)}
           </Text>
         )}
         {join(data.technicalSkills.other) && (
           <Text style={[styles.meta, styles.lh]}>
-            <Text style={{ fontWeight: 700 }}>Other:</Text>{" "}
+            <Text style={styles.bold}>Other:</Text>{" "}
             {join(data.technicalSkills.other)}
           </Text>
         )}
       </View>
-
       {/* EXPERIENCE */}
       {data.experience.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Experience</Text>
+          <View style={styles.hairline} />
           {data.experience.map((x, i) => (
             <View key={i} style={{ marginBottom: 3 }}>
               <View style={styles.rowBetween}>
@@ -220,15 +263,15 @@ export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
                 </Text>
                 <DateRange start={x.start} end={x.end} />
               </View>
-              {pipeJoin([x.location, x.employmentType]) ? (
+              {/* {pipeJoin([x.location, x.employmentType]) ? (
                 <Text style={[styles.meta, styles.lh]}>
                   {pipeJoin([x.location, x.employmentType])}
                 </Text>
-              ) : null}
+              ) : null} */}
               <BulletsTight items={x.bullets} />
               {x.tech?.length ? (
                 <Text style={[styles.tag, styles.lh]}>
-                  <Text style={{ fontWeight: 700 }}>Tech:</Text>{" "}
+                  <Text style={styles.bold}>Tech:</Text>{" "}
                   {x.tech.join(", ")}
                 </Text>
               ) : null}
@@ -236,45 +279,44 @@ export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
           ))}
         </View>
       )}
-
       {/* PROJECTS */}
       {data.projects.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Projects</Text>
+          <View style={styles.hairline} />
           {data.projects.map((p, i) => (
             <View key={i} style={{ marginBottom: 3 }}>
               <View style={styles.rowBetween}>
                 <Text style={[styles.title, styles.lh]}>
                   {p.name}
                   {p.role ? ` — ${p.role}` : ""}
+                  {p.links?.length ? " | " : ""}
+                  {p.links?.map((l, idx) => (
+                    <Text key={idx}>
+                      <Link src={l.url} style={styles.link}>
+                        {l.label}
+                      </Link>
+                      {idx < (p.links?.length || 0) - 1 ? " | " : ""}
+                    </Text>
+                  ))}
                 </Text>
                 <DateRange start={p.start} end={p.end} />
               </View>
               <BulletsTight items={p.bullets} />
               {p.tech?.length ? (
                 <Text style={[styles.tag, styles.lh]}>
-                  <Text style={{ fontWeight: 700 }}>Tech:</Text>{" "}
+                  <Text style={styles.bold}>Tech:</Text>{" "}
                   {p.tech.join(", ")}
-                </Text>
-              ) : null}
-              {p.links?.length ? (
-                <Text style={[styles.meta, styles.lh]}>
-                  {p.links.map((l, idx) => (
-                    <Text key={idx}>
-                      <Link src={l.url}>{l.label}</Link>
-                      {idx < (p.links?.length || 0) - 1 ? " | " : ""}
-                    </Text>
-                  ))}
                 </Text>
               ) : null}
             </View>
           ))}
         </View>
       )}
-
       {/* EDUCATION */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, styles.lh]}>Education</Text>
+        <View style={styles.hairline} />
         {data.education.map((ed, i) => (
           <View key={i} style={{ marginBottom: 2 }}>
             <View style={styles.rowBetween}>
@@ -289,40 +331,40 @@ export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
             </Text>
             {ed.coursework?.length ? (
               <Text style={[styles.meta, styles.lh]}>
-                <Text style={{ fontWeight: 700 }}>Coursework:</Text>{" "}
+                <Text style={styles.bold}>Coursework:</Text>{" "}
                 {ed.coursework.join(", ")}
               </Text>
             ) : null}
             {ed.honors?.length ? (
               <Text style={[styles.meta, styles.lh]}>
-                <Text style={{ fontWeight: 700 }}>Honors:</Text>{" "}
+                <Text style={styles.bold}>Honors:</Text>{" "}
                 {ed.honors.join(", ")}
               </Text>
             ) : null}
           </View>
         ))}
       </View>
-
       {/* ACHIEVEMENTS / CERTS / KEYWORDS */}
       {data.achievements.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Achievements</Text>
+          <View style={styles.hairline} />
           <BulletsTight items={data.achievements} />
         </View>
       )}
-
       {data.certifications?.length ? (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Certifications</Text>
+          <View style={styles.hairline} />
           <Text style={[styles.meta, styles.lh]}>
             {data.certifications.join(" • ")}
           </Text>
         </View>
       ) : null}
-
       {data.keywordBank?.length ? (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, styles.lh]}>Keywords</Text>
+          <View style={styles.hairline} />
           <Text style={[styles.tiny, styles.lh]}>
             {data.keywordBank.join(", ")}
           </Text>
@@ -332,14 +374,36 @@ export const ResumeDocument: React.FC<{ data: ResumeData }> = ({ data }) => (
   </Document>
 );
 
-export const ResumePreview: React.FC<{ data: ResumeData }> = ({ data }) => (
-  <PDFViewer
-    style={{ width: "100%", height: "100%", borderRadius: 12 }}
-    showToolbar
-  >
-    <ResumeDocument data={data} />
-  </PDFViewer>
-);
+export const ResumePreview: React.FC<{ data: ResumeData; key?: number }> = ({
+  data,
+  key,
+}) => {
+  const [isClient, setIsClient] = React.useState(false);
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      key={key}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="w-full h-full"
+    >
+      <PDFViewer
+        style={{ width: "100%", height: "100%", borderRadius: 12 }}
+        showToolbar
+      >
+        <ResumeDocument data={data} />
+      </PDFViewer>
+    </motion.div>
+  );
+};
 
 // Smart default filename: Name_Role_Resume_YYYY-MM-DD.pdf
 function defaultFilename(data: ResumeData) {
